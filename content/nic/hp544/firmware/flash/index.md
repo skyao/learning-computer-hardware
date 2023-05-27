@@ -72,3 +72,52 @@ linux 下类似，注意 -d 参数后面的设置信息需要是类似 "/dev/mst
 ```bash
 sudo flint -d /dev/mst/mt4103_pci_cr0 -i fw-ConnectX3Pro-rel-2_42_5700-764285-B21_Ax-CLP-8025-UEFI-14.11.49-FlexBoot-3.4.754.bin b
 ```
+
+## 重置设置
+
+刷新固件之后，推荐重置网卡设置。windows下:
+
+```bash
+mlxconfig -d mt4103_pci_cr0 reset
+```
+
+linux下:
+
+```bash
+sudo mlxconfig -d /dev/mst/mt4103_pci_cr0 reset
+```
+
+## 切换Ethernet模式
+
+hp544+支持 ib / eth / vpi 三种模式，但一般我固定用 eth 模式（ib模式暂时还不会设置软路由）。这种情况下可以考虑将网卡的工作模式固定为 eth。
+
+windows下:
+
+```bash
+mlxconfig -d mt4103_pci_cr0 set LINK_TYPE_P1=2  # 1. ib模式 2. eth模式 3. vpi 模式 
+mlxconfig -d mt4103_pci_cr0 set LINK_TYPE_P2=2
+```
+
+linux下：
+
+```bash
+sudo mlxconfig -d /dev/mst/mt4103_pciconf0 set LINK_TYPE_P1=2
+sudo mlxconfig -d /dev/mst/mt4103_pciconf0 set LINK_TYPE_P2=2
+```
+
+## 移除 flexboot
+
+flexboot 支持网卡启动，但目前我没有这方面的需求，而 flexboot 会影响开机启动速度，因此在不需要 flexboot 的情况下可以通过移除 flexboot 来加快开机启动速度。
+
+windows下:
+
+```bash
+flint -d mt4103_pci_cr0 --allow_rom_change drom
+```
+
+linux下：
+
+```bash
+sudo flint -d /dev/mst/mt4103_pciconf0 --allow_rom_change drom
+```
+

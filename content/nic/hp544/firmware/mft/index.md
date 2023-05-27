@@ -176,6 +176,92 @@ Querying Mellanox devices firmware ...
 
 类似的，在 windows 下打开 cmd 时必须选择以管理员身份运行 cmd 。
 
+### mlxconfig
+
+mlxconfig工具用于修改网卡的设置，常见命令有:
+
+#### 查询设置
+
+windows下:
+
+```bash
+mlxconfig -d mt4103_pci_cr0 query
+```
+
+linux下:
+
+```bash
+sudo mlxconfig -d /dev/mst/mt4103_pci_cr0 query
+
+sudo mlxconfig -d /dev/mst/mt4103_pci_cr0 query
+
+Device #1:
+----------
+
+Device type:    ConnectX3Pro    
+Device:         /dev/mst/mt4103_pci_cr0
+
+Configurations:                                      Next Boot
+         SRIOV_EN                                    True(1)         
+         NUM_OF_VFS                                  16              
+         WOL_MAGIC_EN_P2                             True(1)         
+         LINK_TYPE_P1                                ETH(2)          
+         PHY_TYPE_P1                                 XFI(2)          
+         XFI_MODE_P1                                 _10G(0)         
+         FORCE_MODE_P1                               False(0)        
+         LINK_TYPE_P2                                ETH(2)          
+         PHY_TYPE_P2                                 XFI(2)          
+         XFI_MODE_P2                                 _10G(0)         
+         FORCE_MODE_P2                               False(0)        
+         LOG_BAR_SIZE                                5               
+         BOOT_PKEY_P1                                0               
+         BOOT_PKEY_P2                                0               
+         BOOT_OPTION_ROM_EN_P1                       True(1)         
+         BOOT_VLAN_EN_P1                             False(0)        
+         BOOT_RETRY_CNT_P1                           0               
+         LEGACY_BOOT_PROTOCOL_P1                     PXE(1)          
+         BOOT_VLAN_P1                                1               
+         BOOT_OPTION_ROM_EN_P2                       True(1)         
+         BOOT_VLAN_EN_P2                             False(0)        
+         BOOT_RETRY_CNT_P2                           0               
+         LEGACY_BOOT_PROTOCOL_P2                     PXE(1)          
+         BOOT_VLAN_P2                                1               
+         IP_VER_P1                                   IPv4(0)         
+         IP_VER_P2                                   IPv4(0)         
+         CQ_TIMESTAMP                                True(1)         
+         STEER_FORCE_VLAN                            False(0)
+```
+
+#### 重置设置
+
+windows下:
+
+```bash
+mlxconfig -d mt4103_pci_cr0 reset
+```
+
+linux下:
+
+```bash
+sudo mlxconfig -d /dev/mst/mt4103_pci_cr0 reset
+```
+
+#### 切换IB/Ethernet模式
+
+windows下:
+
+```bash
+mlxconfig -d mt4103_pci_cr0 set LINK_TYPE_P1=2  # 1. ib模式 2. eth模式 3. vpi 模式 
+mlxconfig -d mt4103_pci_cr0 set LINK_TYPE_P2=2
+```
+
+linux下：
+
+```bash
+sudo mlxconfig -d /dev/mst/mt4103_pciconf0 set LINK_TYPE_P1=2
+sudo mlxconfig -d /dev/mst/mt4103_pciconf0 set LINK_TYPE_P2=2
+```
+
 ### flint工具
 
 flint工具用于刷新网卡的固件，后续详细介绍。
