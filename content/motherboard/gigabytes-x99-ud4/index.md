@@ -1,7 +1,7 @@
 ---
 title: "技嘉x99 UD4主板"
 linkTitle: "技嘉x99 UD4"
-weight: 9999
+weight: 9980
 date: 2023-08-24
 description: >
   中端x99 ATX大板，用来做56G软交换机兼纯ssd nas
