@@ -123,6 +123,20 @@ linux mint 自带的 disk 工具，选择硬盘后，可以进行 disk benchmark
 
 这里测试出来的速度是读取 5.6GB/s，写入 2.4GB/s，就非常接近宣称的读取6500M/写入2300M。
 
+## 华硕z690 + windows10
+
+主板为华硕z690 ddr4, pcie 4.0 x4。
+
+### AS SSD Benchmark 测试数据
+
+![1](images/1.png)
+
+### CrystalDiskMark 测试数据
+
+![1g](images/1g.png)
+
+![64g](images/64g.png)
+
 ## 附录：linux ntfs格式的速度问题
 
 > 结论：ntfs格式的硬盘在 linux 下性能会下降的非常严重，大概只有正常的10%

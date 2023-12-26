@@ -1,15 +1,15 @@
 ---
-title: "ubuntu20.04测试数据"
-linkTitle: "ubuntu20.04"
+title: "pcie4.0测试数据"
+linkTitle: "pcie4.0"
 weight: 120
 date: 2021-03-03
 description: >
-  爱国者p7000z在ubuntu20.04下的速度测试
+  爱国者p7000z在pcie4.0下的速度测试
 ---
 
 硬盘型号 爱国者p7000z，容量 4T , m2 接口 nvme 协议， pcie 4.0 x4， 规格为 2280。
 
-## 华硕z690
+## 华硕z690 + ubuntu 20.04
 
 主板为华硕 z690-p d4, m2 接口 pcie 4.0 x4。
 

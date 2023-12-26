@@ -134,3 +134,24 @@ linux mint 自带的 disk 工具，选择硬盘后，可以进行 disk benchmark
 ![](images/Benchmark_001.png)
 
 这里测试出来的速度是读取 6.9GB/s，写入 5.3GB/s，就非常接近宣称的读取7000M/写入6000M。
+
+## 华硕z690 + windows 10
+
+主板为华硕z690 ddr4, pcie 4.0 x4。
+
+### AS SSD Benchmark 测试结果
+
+
+
+![as-ssd-bench YSSDHB-4TN7000 2023.9.22 14-37-22](images/as-ssd-bench YSSDHB-4TN7000.png)
+
+### crystalDiskMark 测试结果
+
+1GB:
+
+![CrystalDiskMark_20230922150316](images/CrystalDiskMark_20230922150316.png)
+
+64GB:
+
+![CrystalDiskMark_20230922150641](images/CrystalDiskMark_20230922150641.png)
+
