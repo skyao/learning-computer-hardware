@@ -119,6 +119,40 @@ CLR/Ring 设置：
 
 ![aida64](images/aida64.png)
 
+### 功耗墙设置
+
+“IntelRCSetup” -> "Advanced Power Management configuration" -> "SOCKET PAPL Config"
+
+- Long Dur Pwr Limit: 180
+- Long Dur Time Window: 5
+- Short Dur Pwr Limit En: enable
+- Short Dur Pwr Limit: 200
+
+注意：需要将配置修改为 custom，才能设置 "SOCKET PAPL Config"，否则是灰色的无法进入。
+
+### 电流墙设置
+
+没有 “IntelRCSetup” -> "Advanced Power Management configuration" -> "CPU - Advanced PM Tuning" -> "Program PPO_CURT_CFG_CTRL_MSR" 设置，所有无法设置电流墙。
+
+### 奶昔改bios
+
+#### 功耗墙设置
+
+“IntelRCSetup” -> "Advanced Power Management configuration" -> "SOCKET PAPL Config"
+
+- Long Dur Pwr Limit: 160
+- Short Dur Pwr Limit En: enable
+- Short Dur Pwr Limit: 180
+
+
+
+#### 电流墙设置
+
+“IntelRCSetup” -> "Advanced Power Management configuration" -> "CPU - Advanced PM Tuning" -> "Program PPO_CURT_CFG_CTRL_MSR"
+
+- Current Config: enable
+- Current Limitation: 2048 (默认1400)
+
 ## 附录：c state 对性能和功耗的影响
 
 其他维持不变，只修改 c state 的各个选项设置：
