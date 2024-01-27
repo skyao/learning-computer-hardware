@@ -53,7 +53,13 @@ flint -d mt4103_pci_cr0 -i fw-ConnectX4Lx-rel-14_32_1010-MCX4121A-ACU_Ax-UEFI-14
 
 ### 实测
 
-dell cx4121c 刷新固件成功。
+- dell cx4121c
+
+  dell cx4121c 刷新 MCX4121A-ACUT  固件成功。
+
+- MCX4121A-XCAT 10G
+
+  刷新25g MCX4121A-ACUT  固件成功。
 
 ## 参考资料
 

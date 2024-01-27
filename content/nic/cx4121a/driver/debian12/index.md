@@ -1,10 +1,10 @@
 ---
-title: "cx4121a 驱动"
-linkTitle: "驱动"
+title: "debian 12 安装驱动"
+linkTitle: "debian 12"
 weight: 30
 date: 2022-03-10
 description: >
-  为 Mellanox MCX4121A 网卡安装驱动
+  在 debian 12 上安装 Mellanox MCX4121A 网卡的驱动
 ---
 
 ## debian12
@@ -42,11 +42,3 @@ debian12.4
 ```
 
 `--with-nvmf --with-nfsrdma --ovs-dpdk` 这三个参数是可选的，我增加这三个参数主要是为了要学习测试这几个功能。
-
-
-
-## windows 10/windows server 2022
-
-### 下载驱动
-
-下载地址： https://network.nvidia.com/products/adapter-software/ethernet/windows/winof-2/ 
