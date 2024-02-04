@@ -1,7 +1,7 @@
 ---
 title: "评测参考资料"
 linkTitle: "评测参考资料"
-weight: 980
+weight: 20
 date: 2021-03-10
 description: ITGZ USB4移动硬盘盒评测参考资料
 ---
