@@ -28,10 +28,29 @@ MFT 是 Nvidia Firmware Tools （Mellanox Firmware Tools），包含多个工具
 
 下载地址： [NVIDIA Firmware Tools (MFT)](https://network.nvidia.com/products/adapter-software/firmware-tools/)
 
-在页面中的 **MFT Download Center** 下找到对应的平台，一般常用的就是 windows 和 linux：
+在页面中的 **MFT Download Center** 下找到对应的平台，一般常用的就是 windows 和 linux。
+
+注意：hp544+ 等 cx3 pro 的网卡因为已经结束维护周期，新版本的 mft 已经不再支持这些网卡， 体现在 mft 安装完成后，执行 mst status 时会无法找到设备。
+
+```bash
+mst status
+MST modules:
+------------
+    MST PCI module is not loaded
+    MST PCI configuration module is not loaded
+
+PCI Devices:
+------------
+
+	No devices were found.
+```
+
+因此，对于这些老的网卡，要安装旧的版本，如 4.24 版本。
 
 - https://www.mellanox.com/downloads/MFT/WinMFT_x64_4_24_0_72.exe 
 - https://www.mellanox.com/downloads/MFT/mft-4.24.0-72-x86_64-deb.tgz
+
+对于 cx4 / cx5 等新一点的网卡，可以安装最新版本。
 
 ## 安装
 
@@ -55,6 +74,28 @@ $ sudo ./install.sh
 -I- Installing package: /home/sky/hp544/mft-4.24.0-72-x86_64-deb/DEBS/mft_4.24.0-72_amd64.deb
 -I- In order to start mst, please run "mst start".
 ```
+
+### 重新安装
+
+在 pve 下遇到安装时正常使用，后续不知道为什么突然无法使用了，报错如下：
+
+```bash
+mst start  
+Starting MST (Mellanox Software Tools) driver set
+Loading MST PCI modulemodprobe: FATAL: Module mst_pci not found in directory /lib/modules/6.5.13-1-pve
+ - Failure: 1
+Loading MST PCI configuration modulemodprobe: FATAL: Module mst_pciconf not found in directory /lib/modules/6.5.13-1-pve
+ - Failure: 1
+Create devices
+
+mst_pci driver not found
+Unloading MST PCI module (unused)modprobe: FATAL: Module mst_pci not found.
+ - Failure: 1
+Unloading MST PCI configuration module (unused)modprobe: FATAL: Module mst_pciconf not found.
+ - Failure: 1
+```
+
+解决的方式是重新安装 mft 工具，就可以恢复正常使用。
 
 ## 启动
 
