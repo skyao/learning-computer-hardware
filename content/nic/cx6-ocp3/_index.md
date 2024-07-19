@@ -1,7 +1,7 @@
 ---
 title: "Mellanox cx6 ocp3网卡"
 linkTitle: "cx6 ocp3"
-weight: 9500
+weight: 9000
 date: 2022-03-10
 description: >
   Mellanox cx6 ocp3 200g网卡

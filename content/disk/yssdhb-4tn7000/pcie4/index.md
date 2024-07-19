@@ -143,7 +143,7 @@ linux mint 自带的 disk 工具，选择硬盘后，可以进行 disk benchmark
 
 
 
-![as-ssd-bench YSSDHB-4TN7000 2023.9.22 14-37-22](images/as-ssd-bench YSSDHB-4TN7000.png)
+![as-ssd-bench YSSDHB-4TN7000 2023.9.22 14-37-22](images/as-ssd-bench-YSSDHB-4TN7000.png)
 
 ### crystalDiskMark 测试结果
 
