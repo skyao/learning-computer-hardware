@@ -1,9 +1,9 @@
 ---
 title: "ITGZ USB4 40g M.2 nvme 移动硬盘盒"
-linkTitle: "Mac"
+linkTitle: "Mac 雷电4测试"
 weight: 30
 date: 2021-03-10
-description: ITGZ USB4 40g M.2 nvme 移动硬盘盒在mac上的测试情况
+description: ITGZ USB4 40g M.2 nvme 移动硬盘盒在mac雷电4接口上的测试情况
 ---
 
 
@@ -11,7 +11,7 @@ description: ITGZ USB4 40g M.2 nvme 移动硬盘盒在mac上的测试情况
 ## 背景
 
 - 硬盘盒：ITGZ USB4 40g M.2 nvme 移动硬盘盒
-- 硬盘：隐速4TN7000 pcie4.0 4T ssd
+- 硬盘：移速4TN7000 pcie4.0 4T ssd
 - 笔记本：macbook pro m1 max
 - 数据线1：hagibis 海备思双typec全功能usb4数据线，13厘米长度
 - 数据线2: HP惠普雷电4数据线0.7米

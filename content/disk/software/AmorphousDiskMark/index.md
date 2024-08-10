@@ -61,7 +61,7 @@ CrystalDiskMark 的作者允许在本应用程序中使用相同或类似的用�
 ### 外置硬盘盒接pcie4.0 ssd
 
 - 硬盘盒：ITGZ USB4 40g M.2 nvme 移动硬盘盒
-- 硬盘：隐速4TN7000 pcie4.0 4T ssd
+- 硬盘：移速4TN7000 pcie4.0 4T ssd
 - 笔记本：macbook pro m1 max
 - 数据线：hagibis 海备思双typec全功能usb4数据线，13厘米长度
 

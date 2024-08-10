@@ -4,10 +4,10 @@ linkTitle: "pcie4.0"
 weight: 140
 date: 2021-03-03
 description: >
-  隐速4TN7000在pcie4.0下的测试数据
+  移速4TN7000在pcie4.0下的测试数据
 ---
 
-硬盘型号 隐速4TN7000，容量 4T , m2 接口 nvme 协议， pcie 4.0 x4， 规格为 2280。
+硬盘型号 移速4TN7000，容量 4T , m2 接口 nvme 协议， pcie 4.0 x4， 规格为 2280。
 
 ## 华硕z690 + linux mint
 
@@ -140,8 +140,6 @@ linux mint 自带的 disk 工具，选择硬盘后，可以进行 disk benchmark
 主板为华硕z690 ddr4, pcie 4.0 x4。
 
 ### AS SSD Benchmark 测试结果
-
-
 
 ![as-ssd-bench YSSDHB-4TN7000 2023.9.22 14-37-22](images/as-ssd-bench-YSSDHB-4TN7000.png)
 

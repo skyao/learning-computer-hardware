@@ -4,10 +4,10 @@ linkTitle: "pcie3.0"
 weight: 140
 date: 2021-03-03
 description: >
-  隐速4TN7000在pcie3.0下的测试数据
+  移速4TN7000在pcie3.0下的测试数据
 ---
 
-硬盘型号 隐速4TN7000，容量 4T , m2 接口 nvme 协议， pcie 4.0 x4， 规格为 2280。
+硬盘型号 移速4TN7000，容量 4T , m2 接口 nvme 协议， pcie 4.0 x4， 规格为 2280。
 
 ## 技嘉x99 ud4 + ubuntu server
 

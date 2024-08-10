@@ -4,7 +4,7 @@ linkTitle: "评测参考资料"
 weight: 10
 date: 2021-03-03
 description: >
-  隐速4TN7000的评测参考资料
+  移速4TN7000的评测参考资料
 ---
 
 
