@@ -7,9 +7,11 @@ description: >
   在debian12上安装华为sp350网卡的驱动
 ---
 
+> 2024-09-09 更新： debian12 已经升级到 12.5 版本，网卡驱动版本为最新的 24.07-0.6.1.0 版本。
 
+## 准备工作
 
-## 查看默认驱动
+### 查看默认驱动
 
 这是debian12自带的默认驱动情况：
 
@@ -83,33 +85,41 @@ parm:           debug_mask:debug mask: 1 = dump cmd data, 2 = dump cmd exec time
 parm:           prof_sel:profile selector. Valid range 0 - 2 (uint)
 ```
 
-默认驱动的版本为 ``
+默认驱动的版本为 `6.1.0-20`:
 
 ```bash
 modinfo mlx5_core |  grep version
 vermagic:       6.1.0-20-amd64 SMP preempt mod_unload modversions 
 ```
 
-
-
-
-
-## 下载驱动
+### 下载驱动
 
 下载地址：
 
 https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed/
 
-![debian12-download](images/debian12-download.png)
+选择对应的 debian 版本，最新的 24.07-0.6.1.0 版本已经提供对 debian 12.5 版本的支持了：
 
-下载得到 **MLNX_OFED_LINUX-24.01-0.3.3.1-debian12.1-x86_64.tgz** 文件， scp 传到 debian 12 下。
+![mlnx_ofed_download](images/mlnx_ofed_download.png)
+
+下载得到 **MLNX_OFED_LINUX-24.07-0.6.1.0-debian12.5-x86_64.tgz** 文件， scp 传到 debian 12 下。
+
+### 关闭 secure boot
+
+需要在物理机或者虚拟机的 bios 中关闭了 secure boot，会和最新 24.07-0.6.1.0 版本的 mlnx_ofed 驱动冲突。
+
+pve虚拟机中如图：
+
+![disable-secure-boot](images/disable-secure-boot.jpg)
+
+否则安装最新版本的驱动后会报错而导致网卡无法使用。
 
 ## 安装驱动
 
 ```bash
 su root
-tar MLNX_OFED_LINUX-24.01-0.3.3.1-debian12.1-x86_64.tgz
-cd MLNX_OFED_LINUX-24.01-0.3.3.1-debian12.1-x86_64
+tar MLNX_OFED_LINUX-24.07-0.6.1.0-debian12.5-x86_64.tgz
+cd MLNX_OFED_LINUX-24.07-0.6.1.0-debian12.5-x86_64
 ```
 
 设置 PATH 否则默认 PATH 会找不到某些重要的命令而失败:
@@ -127,16 +137,16 @@ export all_proxy=socks5://192.168.0.1:7891;export http_proxy=http://192.168.0.1:
 开始安装:
 
 ```bash
-./mlnxofedinstall --without-fw-update --with-nvmf --with-nfsrdma --ovs-dpdk --distro debian12.1
+./mlnxofedinstall --without-fw-update --with-nvmf --with-nfsrdma --ovs-dpdk
 ```
 
-注意要加 `--distro debian12.1`, 否则可能会报错：
+注意对于某些版本的驱动要加 `--distro debian12.1`, 否则可能会报错：
 
 ```bash
 Error: The current MLNX_OFED_LINUX is intended for debian12.1
 ```
 
-这是因为我安装debian12时版本已经是 12.5了：
+这是因为我安装debian12时版本已经是 12.5了，而最新的 24.07-0.6.1.0 驱动已经有针对 debian 12.5 的打包：
 
 ```bash
 ./mlnxofedinstall --print-distro
@@ -145,10 +155,10 @@ debian12.5
 
 `--with-nvmf --with-nfsrdma --ovs-dpdk` 这三个参数是可选的，我增加这三个参数主要是为了要学习测试这几个功能。
 
-安装过程如下：
+安装过程如下（例子还是24.01-0.3.3.1的，24.07-0.6.1.0 版本类似）：
 
 ```bash
-$./mlnxofedinstall --without-fw-update --with-nvmf --with-nfsrdma --ovs-dpdk --distro debian12.1
+$./mlnxofedinstall --without-fw-update --with-nvmf --with-nfsrdma --ovs-dpdk
 
 Logs dir: /tmp/MLNX_OFED_LINUX.1071.logs
 General log file: /tmp/MLNX_OFED_LINUX.1071.logs/general.log
@@ -292,14 +302,37 @@ To load the new driver, run:
 Note: In order to load the new nvme-rdma and nvmet-rdma modules, the nvme module must be reloaded.
 ```
 
-## 特殊处理
+重启之后, 24.01-0.3.3.1 和之前的版本就可以正常工作了。
+
+### 报错：pci_hp_register failed
+
+但最新的 24.07-0.6.1.0 版本会报错， `ip addr` 会发现 cx5 网卡不见了。
+
+`dmesg` 查看，会发现有这样的错误提示：
+
+```bash
+pci_hp_register failed with error -16
+```
+
+如果升级 linix 内核，则会在升级时提示 "Your system has UEFI Secure Boot enabled"：
+
+![](images/secure-boot-enabled-warnning.jpg)
+
+
+我就是根据这个线索，去虚拟机的 bios 中关闭了 secure boot：
+
+![](images/disable-secure-boot.jpg)
+
+重启就正常了。
+
+## 安装后处理
 
 ### 取消 openibd 的自动启动
 
 安装完成后，重启之前，取消 openibd 的开机自动启动：
 
 ```bash
-systemctl disable openibd
+sudo systemctl disable openibd
 ```
 
 输出为：
@@ -316,16 +349,20 @@ Removed "/etc/systemd/system/sysinit.target.wants/openibd.service".
 
 - [Known Issues - NVIDIA Docs](https://docs.nvidia.com/networking/display/mlnxofedv23101190lts/known+issues)： 页面搜索 3678715 或者 openIbd
 
-## 查看安装后的驱动信息
+### 查看安装后的驱动信息
 
 ```bash
 $ lsmod | grep mlx
-mlx5_ib               405504  0
-ib_uverbs             172032  1 mlx5_ib
-ib_core               438272  2 ib_uverbs,mlx5_ib
-mlx5_core            1683456  1 mlx5_ib
+
+mlx5_ib               479232  0
+ib_uverbs             184320  2 rdma_ucm,mlx5_ib
+ib_core               454656  8 rdma_cm,ib_ipoib,iw_cm,ib_umad,rdma_ucm,ib_uverbs,mlx5_ib,ib_cm
+mlx5_core            2420736  1 mlx5_ib
 mlxfw                  36864  1 mlx5_core
 psample                20480  1 mlx5_core
+mlxdevm               180224  1 mlx5_core
+mlx_compat             20480  11 rdma_cm,ib_ipoib,mlxdevm,iw_cm,ib_umad,ib_core,rdma_ucm,ib_uverbs,mlx5_ib,ib_cm,mlx5_core
+tls                   135168  1 mlx5_core
 pci_hyperv_intf        16384  1 mlx5_core
 ```
 
@@ -333,15 +370,15 @@ mlx5_core 的详细信息：
 
 ```bash
 $ modinfo mlx5_core                
-filename:       /lib/modules/6.1.0-20-amd64/updates/dkms/mlx5_core.ko
+filename:       /lib/modules/6.1.0-25-amd64/updates/dkms/mlx5_core.ko
 alias:          auxiliary:mlx5_core.eth-rep
 alias:          auxiliary:mlx5_core.eth
-basedon:        Korg 6.3-rc3
-version:        24.01-0.3.3
+basedon:        Korg 6.8-rc4
+version:        24.07-0.6.1
 license:        Dual BSD/GPL
 description:    Mellanox 5th generation network adapters (ConnectX series) core driver
 author:         Eli Cohen <eli@mellanox.com>
-srcversion:     59290B9C495B89FC195B001
+srcversion:     769E8732BF9FAF2E580D2BC
 alias:          pci:v000015B3d0000A2DFsv*sd*bc*sc*i*
 alias:          pci:v000015B3d0000A2DCsv*sd*bc*sc*i*
 alias:          pci:v000015B3d0000A2D6sv*sd*bc*sc*i*
@@ -363,34 +400,33 @@ alias:          pci:v000015B3d00001015sv*sd*bc*sc*i*
 alias:          pci:v000015B3d00001014sv*sd*bc*sc*i*
 alias:          pci:v000015B3d00001013sv*sd*bc*sc*i*
 alias:          auxiliary:mlx5_core.sf
-depends:        mlx_compat,mlxdevm,psample,tls,pci-hyperv-intf,mlxfw
+depends:        mlxdevm,mlx_compat,tls,pci-hyperv-intf,psample,mlxfw
 retpoline:      Y
 name:           mlx5_core
-vermagic:       6.1.0-20-amd64 SMP preempt mod_unload modversions 
+vermagic:       6.1.0-25-amd64 SMP preempt mod_unload modversions 
 sig_id:         PKCS#7
 signer:         DKMS module signing key
-sig_key:        3F:5E:C0:5F:E6:49:8A:F5:4A:C7:DA:1B:55:3C:50:18:9F:E0:70:C9
+sig_key:        25:DA:47:F2:9F:35:E2:08:53:6F:AD:D7:4E:06:E8:E0:59:C8:1E:89
 sig_hashalgo:   sha256
-signature:      91:E0:1B:FE:CA:B0:27:B1:76:4B:19:C3:FB:1F:1A:42:2E:1F:EC:79:
-		43:70:B4:D7:E5:BA:36:FA:91:0A:50:D3:F1:B6:D7:11:15:86:E8:CC:
-		CA:3B:D7:05:92:77:DE:7F:24:0E:0A:5B:45:9F:74:08:97:C1:A2:3D:
-		C3:27:87:8B:2C:05:3B:61:63:6A:92:1C:69:52:76:F4:5F:B1:96:F7:
-		F7:01:33:BA:40:58:EC:7F:46:9D:28:11:11:CC:BE:1D:91:E2:19:FB:
-		B9:50:7D:91:23:23:93:9D:B9:12:6D:76:11:1D:34:D9:B9:2B:65:C0:
-		B6:B6:5D:9C:01:7A:0E:26:0A:D1:8B:28:79:4E:2E:AB:73:FA:48:01:
-		4D:4A:76:5E:D6:61:9A:2C:8E:45:60:96:EB:6E:94:EE:75:2F:B8:B3:
-		E9:02:B5:C2:D3:3E:CD:0D:0A:AE:64:B9:68:9D:BE:10:06:B2:55:57:
-		D7:E7:0D:28:5A:9A:DE:19:4F:00:94:7E:45:06:E8:2F:46:3C:5C:F6:
-		FF:75:ED:E9:87:98:B0:D1:17:50:59:38:1E:D2:C8:FE:B9:6F:60:5E:
-		03:2A:36:38:27:EB:0E:D4:2B:4E:BB:E6:F5:83:50:EC:AE:FE:A6:D1:
-		CA:25:40:62:78:15:20:34:ED:15:3D:95:4A:AC:95:15
+signature:      01:97:E6:8D:53:AD:D9:38:E0:D5:8C:00:B9:8F:EB:C6:2E:5F:DF:7F:
+		C5:DB:AA:62:85:81:36:F1:8E:E3:82:2E:33:63:9B:E6:57:07:2D:DC:
+		43:51:C4:04:15:AA:C9:B7:A1:02:58:1F:74:EE:2A:27:91:B4:A2:23:
+		FE:25:31:06:62:1D:D0:2D:A6:55:C5:B2:CB:A4:25:0B:DA:24:18:81:
+		0E:E3:7A:76:EC:5A:C3:E0:A7:E5:75:44:4C:BD:3C:E1:AD:55:EA:F1:
+		6A:E7:B4:7A:03:A6:DD:32:10:5B:A4:A0:74:EC:02:E0:D1:33:65:E2:
+		17:4C:16:01:54:5D:60:C5:AF:0E:4C:4A:73:4B:FB:C8:BB:0A:00:AB:
+		80:05:82:E2:9A:72:58:F6:0A:18:21:E2:3E:57:91:9A:2D:31:DC:04:
+		55:A0:3E:B2:62:7D:F4:F1:9A:8C:B6:9F:88:27:A3:92:07:14:57:28:
+		D4:61:4C:B2:EE:70:A4:DF:90:C9:F3:0C:85:43:8F:C2:C0:C1:75:77:
+		E6:76:CD:26:B6:6D:F7:13:10:B0:EC:CA:9F:B8:31:3E:C3:A3:FA:ED:
+		3E:CB:55:D6:7D:0E:6A:32:66:1E:C0:95:E1:00:F3:47:DA:20:0D:1E:
+		68:DF:1F:4E:4C:99:97:D6:55:48:2B:65:E6:47:1A:35
 parm:           num_of_groups:Eswitch offloads number of big groups in FDB table. Valid range 1 - 1024. Default 15 (uint)
 parm:           debug_mask:debug mask: 1 = dump cmd data, 2 = dump cmd exec time, 3 = both. Default=0 (uint)
-parm:           prof_sel:profile selector. Valid range 0 - 3 (uint)
-parm:           probe_vf:probe VFs or not, 0 = not probe, 1 = probe. Default = 1 (bool)
+parm:           prof_sel:profile selector. Valid range 0 - 4 (uint)
 ```
 
-更新
+更新之后 mlx5_core 的版本从默认升级到 24.01-0.3.3 ：
 
 ```bash
 $ modinfo mlx5_core |  grep version
