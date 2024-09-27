@@ -1,10 +1,12 @@
 ---
-title: "修复在pve8.0下无法使用的问题"
+title: "[归档]修复在pve8.0下无法使用的问题"
 linkTitle: "pve8.0修复"
-weight: 10
+weight: 1000
 date: 2021-03-10
 description: 修复爱国者p7000z 4t在pve8.0下无法使用的问题
 ---
+
+> 归档原因： pve 升级到8.2之后就没有这个问题了。
 
 ## 问题描述
 

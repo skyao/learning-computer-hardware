@@ -1,7 +1,7 @@
 ---
 title: "英睿达铂胜8G ddr4 3000内存"
 linkTitle: "英睿达铂胜8G"
-weight: 9900
+weight: 10000
 date: 2023-12-10
 description: 英睿达铂胜8G ddr4 3000内存，超频还可以，时序一般
 ---
