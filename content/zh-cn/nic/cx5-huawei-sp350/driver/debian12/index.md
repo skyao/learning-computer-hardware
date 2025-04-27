@@ -745,7 +745,7 @@ sudo systemctl restart networking
 
 ```bash
 sudo vi /etc/network/interfaces
-``` 
+```
 
 增加内容：
 
@@ -816,11 +816,11 @@ sudo mount -t nfs 192.168.119.1:/exports/shared /mnt/nfs
 ```bash
 cd nfs
 
-# nfs 写入100G数据，速度大概在 1.1 GB/s
+# nfs 写入100G数据，速度大概在 1.0 GB/s
 sudo dd if=/dev/zero of=./test-100g.img bs=1G count=100 oflag=dsync
 107374182400 bytes (107 GB, 100 GiB) copied, 107.297 s, 1.0 GB/s
 
-# nfs 读取100G数据，速度大概在 3.4 GB/s
+# nfs 读取100G数据，速度大概在 2.5 GB/s
 sudo dd if=./test-100g.img of=/dev/null bs=1G count=100 iflag=dsync
 107374182400 bytes (107 GB, 100 GiB) copied, 43.7245 s, 2.5 GB/s
 ```
@@ -832,7 +832,7 @@ sudo dd if=./test-100g.img of=/dev/null bs=1G count=100 iflag=dsync
 sudo dd if=/dev/zero of=./test-100g.img bs=1G count=100 oflag=dsync
 107374182400 bytes (107 GB, 100 GiB) copied, 82.5747 s, 1.3 GB/s
 
-# 直接硬盘读取100G数据，速度大概在 1.3 GB/s
+# 直接硬盘读取100G数据，速度大概在 4.0 GB/s
 sudo dd if=./test-100g.img of=/dev/null bs=1G count=100 iflag=dsync
 107374182400 bytes (107 GB, 100 GiB) copied, 26.9138 s, 4.0 GB/s
 ```
@@ -1050,7 +1050,7 @@ nfs server 需要开启 rdma 支持：
 sudo vi /etc/nfs.conf
 ```
 
-增加内容：
+~~增加内容~~（备注：实践证明这个来自deepseek的指导意见是错误的，不要这么设置）：
 
 ```bash
 [nfsrdma]
@@ -1058,32 +1058,25 @@ enable=1
 port=20049
 ```
 
-但也有资料说是修改 /etc/nfs.conf 文件的 [nfsd] 部分：
+但也有资料说是修改 /etc/nfs.conf 文件的 [nfsd] 部分（备注：实践证明是正确的，但是一定要把 nfs 版本那几行也放开）：
 
 ```bash
 [nfsd]
 # debug=0
-# threads=8
+# 线程改大一点，默认8太少了
+threads=128
 # host=
 # port=0
 # grace-time=90
 # lease-time=90
 # udp=n
 # tcp=y
-# vers3=y
-# vers4=y
-# vers4.0=y
-# vers4.1=y
-# vers4.2=y
-# rdma=n
-# rdma-port=20049
-```
-
-尝试将这里的 rdma 和 rdma-port 设置为 y 和 20049：
-
-```bash
-[nfsd]
-......
+# 版本这几行一定要设置，注意只保留4.2版本
+vers3=n
+vers4=y
+vers4.0=n
+vers4.1=n
+vers4.2=y
 rdma=y
 rdma-port=20049
 ```
@@ -1097,14 +1090,16 @@ sudo systemctl restart nfs-server
 验证 NFS RDMA 服务是否监听：  
 
 ```bash
+# 备注：这个验证方式是错误的（来自deepseek）
 sudo rpcinfo -p | grep 20049
+# 检查端口的其他方式
+sudo ss -tulnp | grep ':20049'
+# sudo apt install net-tools
+sudo netstat -tulnp | grep ':20049'
+sudo lsof -i :20049
 ```
 
-预计输出：
-
-```bash
-20049  2   tcp   192.168.119.1
-```
+应该说是 20049 不是 tcp 端口吧？
 
 ## 配置 nfs client（rdma）
 
@@ -1165,10 +1160,29 @@ sudo mkdir -p nfs-rdma
 带 nfsrdma 方式的挂载 nfs：
 
 ```bash
-sudo mount -t nfs -o rdma,port=20049,vers=4.2 192.168.119.1:/exports/shared /mnt/nfs-rdma
+sudo mount -t nfs -o rdma,port=20049,vers=4.2,nconnect=16 192.168.119.1:/exports/shared /mnt/nfs-rdma
 ```
 
 挂载成功后，测试一下读写速度：
+
+```bash
+# nfs 写入100G数据，速度大概在 1.0 GB/s
+sudo dd if=/dev/zero of=./test-100g.img bs=1G count=100 oflag=dsync
+107374182400 bytes (107 GB, 100 GiB) copied, 104.569 s, 1.0 GB/s
+# nfs 读取100G数据，速度大概在 2.2 GB/s
+sudo dd if=./test-100g.img of=/dev/null bs=1G count=100 iflag=dsync
+107374182400 bytes (107 GB, 100 GiB) copied, 47.4093 s, 2.2 GB/s
+```
+
+对比三者的速度，同一块铠侠 cd6 3.84T ssd 硬盘直通到虚拟机：
+
+| 场景               | 100g 单文件写入 | 100g 单文件读取 |
+| ------------------ | --------------- | --------------- |
+| 直接读写硬盘       | 1.3 GB/s        | 4.0 GB/s        |
+| nfs 挂载(non-rdma) | 1.0 GB/s        | 2.5 GB/s        |
+| nfs 挂载(rdma)     | 1.0 GB/s        | 2.2 GB/s        |
+
+
 
 
 ## 配置自动加载
