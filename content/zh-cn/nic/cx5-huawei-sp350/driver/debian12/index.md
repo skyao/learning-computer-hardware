@@ -317,7 +317,6 @@ pci_hp_register failed with error -16
 
 ![](images/secure-boot-enabled-warnning.jpg)
 
-
 我就是根据这个线索，去虚拟机的 bios 中关闭了 secure boot：
 
 ![](images/disable-secure-boot.jpg)
@@ -326,7 +325,7 @@ pci_hp_register failed with error -16
 
 ## 安装后处理
 
-### 取消 openibd 的自动启动
+### ~~取消 openibd 的自动启动~~
 
 安装完成后，重启之前，取消 openibd 的开机自动启动：
 
@@ -342,7 +341,7 @@ Executing: /lib/systemd/systemd-sysv-install disable openibd
 Removed "/etc/systemd/system/sysinit.target.wants/openibd.service".
 ```
 
-反正目前也只用到 eth 模式，不用 ib 模式。
+~~反正目前也只用到 eth 模式，不用 ib 模式。~~ 先保留吧，可能 nfs on rdma 会用到？待验证。
 
 参考：
 
@@ -426,7 +425,7 @@ parm:           debug_mask:debug mask: 1 = dump cmd data, 2 = dump cmd exec time
 parm:           prof_sel:profile selector. Valid range 0 - 4 (uint)
 ```
 
-更新之后 mlx5_core 的版本从默认升级到 24.01-0.3.3 ：
+更新之后 mlx5_core 的版本从默认升级到 24.10-2.1.8 ：
 
 ```bash
 $ modinfo mlx5_core |  grep version
@@ -500,6 +499,17 @@ N: Download is performed unsandboxed as root as file '/home/sky/temp/mlnx-nfsrdm
 
 重启。
 
+总结，在安装 nfsrdma 时，包含了以下重要模块：
+
+- rpcrdma
+- svcrdma
+- xprtrdma
+
+另外在驱动安装时， 也包含了和 rdma 相关的模块：
+
+- rdma-core
+- rdmacm-utils
+
 ### 验证模块加载
 
 运行以下命令检查模块是否已加载：
@@ -510,7 +520,7 @@ lsmod | grep -E "rpcrdma|svcrdma|xprtrdma"
 
 如果无输出，手动加载模块：
 
-```
+```bash
 sudo modprobe rpcrdma
 sudo modprobe svcrdma
 sudo modprobe xprtrdma
@@ -522,17 +532,19 @@ sudo modprobe xprtrdma
 
 确认 DKMS 模块已注册：
 
-```
+```bash
 sudo dkms status | grep nfsrdma
 ```
 
 输出：
 
-```
+```bash
 mlnx-nfsrdma/24.10.OFED.24.10.2.1.8.1, 6.1.0-31-amd64, x86_64: installed
 ```
 
-## nfs server
+## 配置 nfs server（non-rdma）
+
+### 准备硬盘和分区
 
 直通一块 3.84T 的 KIOXIA CD6 pcie4 SSD 进来虚拟机。查看这块 ssd 硬盘：
 
@@ -607,6 +619,8 @@ nvme0n1
 └─nvme0n1p1 ext4   1.0         1dee904a-aa51-4180-b65b-9449405b841f    3.3T     0% /mnt/data
 ```
 
+### 准备伪文件系统
+
 为了方便后续的管理，采用伪文件系统:
 
 ```bash
@@ -638,7 +652,7 @@ sudo vi /etc/fstab
 /mnt/data/shared /exports/shared     none bind
 ```
 
-配置 nfs export
+### 配置 nfs export
 
 ```bash
 sudo vi /etc/exports
@@ -685,9 +699,507 @@ Export list for debian12:
 /exports/shared 192.168.0.0/16
 ```
 
-## nfs client
+## 配置 nfs client（non-rdma）
+
+### 准备驱动和 nfsrdma
+
+和 nfs server 一样安装驱动和nfsrdma。
+
+### 安装 nfs-common
+
+然后安装 nfs-common 作为 nfs client：
+
+```bash
+sudo apt-get install nfs-common 
+```
+
+### 建立服务器和客户端之间的网络连接
+
+为了避免 linux bridge 或者 ovs 的桥接，直接使用物理网口连接两台服务器。
+
+服务器端设置网卡地址：
+
+```bash
+sudo vi /etc/network/interfaces
+```
+
+增加内容：
+
+```bash
+allow-hotplug enp1s0f1np1
+# iface enp1s0f1np1 inet dhcp
+iface enp1s0f1np1 inet static
+address 192.168.119.1
+netmask 255.255.255.0
+gateway 192.168.3.1
+dns-nameservers 192.168.3.1
+```
+
+重启网卡：
+
+```bash
+sudo systemctl restart networking
+```
+
+客户端设置网卡地址：
+
+```bash
+sudo vi /etc/network/interfaces
+``` 
+
+增加内容：
+
+```bash
+allow-hotplug enp1s0np0
+# iface enp1s0np0 inet dhcp
+iface enp1s0np0 inet static
+address 192.168.119.2
+netmask 255.255.255.0
+gateway 192.168.119.1
+dns-nameservers 192.168.119.1
+```
+
+重启网卡：
+
+```bash
+sudo systemctl restart networking
+```
+
+验证两台机器可以互联：
+
+```bash
+ping 192.168.119.1
+ping 192.168.119.2
+```
+
+验证两台机器之间的网速，服务器端自动 iperf 服务器端：
+
+```bash
+iperf -s 192.168.119.1
+```
+
+客户端 iperf 测试：
+
+```bash
+iperf -c 192.168.119.1 -i 1 -t 20 -P 4
+```
+
+测试出来的速度大概是 94.1 Gbits/sec，比较接近100G网卡的理论最大速度了：
+
+```bash
+[  4] 0.0000-20.0113 sec  39.2 GBytes  16.8 Gbits/sec
+[  2] 0.0000-20.0111 sec  70.1 GBytes  30.1 Gbits/sec
+[  3] 0.0000-20.0113 sec  70.8 GBytes  30.4 Gbits/sec
+[  1] 0.0000-20.0111 sec  39.2 GBytes  16.8 Gbits/sec
+[SUM] 0.0000-20.0007 sec   219 GBytes  94.1 Gbits/sec
+```
+
+此时 nfs 服务器端和客户端之间的网络连接已经没有问题了，可以开始配置 nfs 了。
+
+### 配置 nfs 访问（non-rdma）
+
+准备好挂载点：
+
+```bash
+cd /mnt
+sudo mkdir -p nfs
+```
+
+不带 nfsrdma 方式的挂载 nfs：
+
+```bash
+sudo mount -t nfs 192.168.119.1:/exports/shared /mnt/nfs
+```
+
+挂载成功后，测试一下读写速度：
+
+```bash
+cd nfs
+
+# nfs 写入100G数据，速度大概在 1.1 GB/s
+sudo dd if=/dev/zero of=./test-100g.img bs=1G count=100 oflag=dsync
+107374182400 bytes (107 GB, 100 GiB) copied, 107.297 s, 1.0 GB/s
+
+# nfs 读取100G数据，速度大概在 3.4 GB/s
+sudo dd if=./test-100g.img of=/dev/null bs=1G count=100 iflag=dsync
+107374182400 bytes (107 GB, 100 GiB) copied, 43.7245 s, 2.5 GB/s
+```
+
+对比一下在 nfs server 端直接硬盘读写 10G 数据的速度：
+
+```bash
+# 直接硬盘写入100G数据，速度大概在 1.3 GB/s
+sudo dd if=/dev/zero of=./test-100g.img bs=1G count=100 oflag=dsync
+107374182400 bytes (107 GB, 100 GiB) copied, 82.5747 s, 1.3 GB/s
+
+# 直接硬盘读取100G数据，速度大概在 1.3 GB/s
+sudo dd if=./test-100g.img of=/dev/null bs=1G count=100 iflag=dsync
+107374182400 bytes (107 GB, 100 GiB) copied, 26.9138 s, 4.0 GB/s
+```
+
+写入性能差异不大（1.3 GB/s 降低到 1.0 GB/s），估计是硬盘持续写入速度限制了。读取的性能有很大的差异（4.0 GB/s 降低到 2.5 GB/s）。
+
+现在 nfs 服务器端和客户端之间的网络连接已经没有问题了，可以开始配置 RDMA 了。
+
+## 配置 nfs server（rdma）
+
+为了确保安全，尤其是升级内核之后，先安装内核头文件并重新编译 nfsrdma 模块： 
+
+```bash
+sudo apt install linux-headers-$(uname -r)
+sudo dkms autoinstall
+```
+
+### 检查 RDMA 相关模块是否已加载
+
+运行以下命令检查模块是否已加载：
+
+```bash
+lsmod | grep -E "rpcrdma|svcrdma|xprtrdma|ib_core|mlx5_ib"
+```
+
+预计输出：
+
+```bash
+xprtrdma               16384  0
+svcrdma                16384  0
+rpcrdma                94208  0
+rdma_cm               139264  2 rpcrdma,rdma_ucm
+mlx5_ib               495616  0
+ib_uverbs             188416  2 rdma_ucm,mlx5_ib
+ib_core               462848  9 rdma_cm,ib_ipoib,rpcrdma,iw_cm,ib_umad,rdma_ucm,ib_uverbs,mlx5_ib,ib_cm
+sunrpc                692224  18 nfsd,rpcrdma,auth_rpcgss,lockd,nfs_acl
+mlx5_core            2441216  1 mlx5_ib
+mlx_compat             20480  15 rdma_cm,ib_ipoib,mlxdevm,rpcrdma,mlxfw,xprtrdma,iw_cm,svcrdma,ib_umad,ib_core,rdma_ucm,ib_uverbs,mlx5_ib,ib_cm,mlx5_core
+```
+
+如果无输出，手动加载模块：
+
+```bash
+sudo modprobe rpcrdma
+sudo modprobe svcrdma
+sudo modprobe xprtrdma
+sudo modprobe ib_core
+sudo modprobe mlx5_ib
+```
+
+确认 DKMS 模块已注册：
+
+```bash
+sudo dkms status | grep nfsrdma
+```
+
+输出：
+
+```bash
+mlnx-nfsrdma/24.10.OFED.24.10.2.1.8.1, 6.1.0-31-amd64, x86_64: installed
+```
+
+检查内核日志：
+
+```bash   
+sudo dmesg | grep rdma
+[  178.512334] RPC: Registered rdma transport module.
+[  178.512336] RPC: Registered rdma backchannel transport module.
+[  178.515613] svcrdma: svcrdma is obsoleted, loading rpcrdma instead
+[  178.552178] xprtrdma: xprtrdma is obsoleted, loading rpcrdma instead
+```
+
+### 测试 RDMA 连接
+
+在服务器端执行：
+
+```bash
+ibstatus
+```
+
+我这里开启了一个网卡 mlx5_1：
+
+```bash
+Infiniband device 'mlx5_0' port 1 status:
+	default gid:	 fe80:0000:0000:0000:1e34:daff:fe5a:1fec
+	base lid:	 0x0
+	sm lid:		 0x0
+	state:		 1: DOWN
+	phys state:	 3: Disabled
+	rate:		 100 Gb/sec (4X EDR)
+	link_layer:	 Ethernet
+
+Infiniband device 'mlx5_1' port 1 status:
+	default gid:	 fe80:0000:0000:0000:1e34:daff:fe5a:1fed
+	base lid:	 0x0
+	sm lid:		 0x0
+	state:		 4: ACTIVE
+	phys state:	 5: LinkUp
+	rate:		 100 Gb/sec (4X EDR)
+	link_layer:	 Ethernet
+```
+
+或者执行 ibdev2netdev 显示：
+
+```bash
+$ ibdev2netdev
+
+mlx5_0 port 1 ==> enp1s0f0np0 (Down)
+mlx5_1 port 1 ==> enp1s0f1np1 (Up)
+```
+
+因此在 mlx5_1 上启动 ib_write_bw 测试：
+
+```bash
+ib_write_bw -d mlx5_1 -p 18515
+```
+
+显示：
+
+```bash
+************************************
+* Waiting for client to connect... *
+************************************
+```
+
+在客户端执行：
+
+```bash
+ibstatus
+```
+
+显示为：
+
+```bash
+Infiniband device 'mlx5_0' port 1 status:
+	default gid:	 fe80:0000:0000:0000:8e2a:8eff:fe88:a136
+	base lid:	 0x0
+	sm lid:		 0x0
+	state:		 4: ACTIVE
+	phys state:	 5: LinkUp
+	rate:		 100 Gb/sec (4X EDR)
+	link_layer:	 Ethernet
+```
+
+因此在 mlx5_0 上启动 ib_write_bw 测试：
+
+```bash
+ib_write_bw -d mlx5_0 -p 18515 192.168.119.1
+```
+
+客户端显示测试结果为：
+
+```bash
+---------------------------------------------------------------------------------------
+                    RDMA_Write BW Test
+ Dual-port       : OFF		Device         : mlx5_0
+ Number of qps   : 1		Transport type : IB
+ Connection type : RC		Using SRQ      : OFF
+ PCIe relax order: ON		Lock-free      : OFF
+ ibv_wr* API     : ON		Using DDP      : OFF
+ TX depth        : 128
+ CQ Moderation   : 1
+ Mtu             : 1024[B]
+ Link type       : Ethernet
+ GID index       : 3
+ Max inline data : 0[B]
+ rdma_cm QPs	 : OFF
+ Data ex. method : Ethernet
+---------------------------------------------------------------------------------------
+ local address: LID 0000 QPN 0x009b PSN 0x57bb8f RKey 0x1fd4bc VAddr 0x007f0e0c8aa000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:119:02
+ remote address: LID 0000 QPN 0x0146 PSN 0x860b7f RKey 0x23c6bc VAddr 0x007fb25aea4000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:119:01
+---------------------------------------------------------------------------------------
+ #bytes     #iterations    BW peak[MiB/sec]    BW average[MiB/sec]   MsgRate[Mpps]
+ 65536      5000             11030.78            11030.45		     0.176487
+---------------------------------------------------------------------------------------
+```
+
+服务器端显示测试结果为：
+
+```bash
+---------------------------------------------------------------------------------------
+                    RDMA_Write BW Test
+ Dual-port       : OFF		Device         : mlx5_1
+ Number of qps   : 1		Transport type : IB
+ Connection type : RC		Using SRQ      : OFF
+ PCIe relax order: ON		Lock-free      : OFF
+ ibv_wr* API     : ON		Using DDP      : OFF
+ CQ Moderation   : 1
+ Mtu             : 1024[B]
+ Link type       : Ethernet
+ GID index       : 3
+ Max inline data : 0[B]
+ rdma_cm QPs	 : OFF
+ Data ex. method : Ethernet
+---------------------------------------------------------------------------------------
+ local address: LID 0000 QPN 0x0146 PSN 0x860b7f RKey 0x23c6bc VAddr 0x007fb25aea4000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:119:01
+ remote address: LID 0000 QPN 0x009b PSN 0x57bb8f RKey 0x1fd4bc VAddr 0x007f0e0c8aa000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:119:02
+---------------------------------------------------------------------------------------
+ #bytes     #iterations    BW peak[MiB/sec]    BW average[MiB/sec]   MsgRate[Mpps]
+ 65536      5000             11030.78            11030.45		     0.176487
+---------------------------------------------------------------------------------------
+```
+
+测试成功，说明 RDMA 网络就绪。
+
+### 开启 nfs server 的 RDMA 支持
+
+nfs server 需要开启 rdma 支持： 
+
+```bash
+sudo vi /etc/nfs.conf
+```
+
+增加内容：
+
+```bash
+[nfsrdma]
+enable=1
+port=20049
+```
+
+但也有资料说是修改 /etc/nfs.conf 文件的 [nfsd] 部分：
+
+```bash
+[nfsd]
+# debug=0
+# threads=8
+# host=
+# port=0
+# grace-time=90
+# lease-time=90
+# udp=n
+# tcp=y
+# vers3=y
+# vers4=y
+# vers4.0=y
+# vers4.1=y
+# vers4.2=y
+# rdma=n
+# rdma-port=20049
+```
+
+尝试将这里的 rdma 和 rdma-port 设置为 y 和 20049：
+
+```bash
+[nfsd]
+......
+rdma=y
+rdma-port=20049
+```
+
+然后重启 NFS 服务：
+
+```bash
+sudo systemctl restart nfs-server
+```
+
+验证 NFS RDMA 服务是否监听：  
+
+```bash
+sudo rpcinfo -p | grep 20049
+```
+
+预计输出：
+
+```bash
+20049  2   tcp   192.168.119.1
+```
+
+## 配置 nfs client（rdma）
+
+### 检查 rdma 模块
+
+确保客户端和 rdma 相关的模块都已经加载：
+
+```bash
+lsmod | grep -E "rpcrdma|svcrdma|xprtrdma|ib_core|mlx5_ib"
+```
+
+如果没有，手动加载模块：
+
+```bash
+sudo modprobe rpcrdma
+sudo modprobe svcrdma
+sudo modprobe xprtrdma
+sudo modprobe ib_core
+sudo modprobe mlx5_ib
+```
+
+确认 DKMS 模块已注册：
+
+```bash
+sudo dkms status | grep nfsrdma
+```
+
+预计输出：
+
+```bash
+mlnx-nfsrdma/24.10.OFED.24.10.2.1.8.1, 6.1.0-31-amd64, x86_64: installed
+```
+
+检查内核日志：
+
+```bash
+sudo dmesg | grep rdma
+```
+
+预计输出：
+
+```bash
+[ 3273.613081] RPC: Registered rdma transport module.
+[ 3273.613082] RPC: Registered rdma backchannel transport module.
+[ 3695.887144] svcrdma: svcrdma is obsoleted, loading rpcrdma instead
+[ 3695.923962] xprtrdma: xprtrdma is obsoleted, loading rpcrdma instead
+```
+
+### 配置 nfs 访问（rdma）
+
+准备挂载点：
+
+```bash
+cd /mnt
+sudo mkdir -p nfs-rdma
+```
+
+带 nfsrdma 方式的挂载 nfs：
+
+```bash
+sudo mount -t nfs -o rdma,port=20049,vers=4.2 192.168.119.1:/exports/shared /mnt/nfs-rdma
+```
+
+挂载成功后，测试一下读写速度：
 
 
+## 配置自动加载
+
+### nfs server 端
+
+```bash
+echo "rpcrdma" | sudo tee -a /etc/modules-load.d/rdma.conf
+```
+
+然后更新 initramfs：
+
+```bash
+sudo update-initramfs -u  
+```
+
+### nfs client 端
+
+```bash
+echo "rpcrdma" | sudo tee -a /etc/modules-load.d/rdma.conf
+```
+
+然后更新 initramfs：
+
+```bash
+sudo update-initramfs -u  
+```
 
 
+## 参考文件
 
+- [NFS RDMA 配置指南](https://www.mellanox.com/products/infiniband-drivers/linux/mlnx-ofed/nfs-rdma)
+
+- [配置基于RDMA的NFS服务](https://vqiu.cn/nfs-rdma/): 资料有点老，基于 ubuntu 18.04 / linux 5.4 内核，cx3-pro网卡
