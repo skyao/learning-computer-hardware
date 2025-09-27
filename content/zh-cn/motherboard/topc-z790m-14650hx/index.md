@@ -1,13 +1,15 @@
 ---
-title: "天邦14600hx主板"
-linkTitle: "天邦14600hx"
+title: "天邦14650hx主板"
+linkTitle: "天邦14650hx"
 weight: 9950
 date: 2023-08-24
 description: >
-  天邦MoDT魔改主板，搭载14650hx qs cpu，matx版型ddr4内存 
+  天邦MoDT魔改主板，搭载14650hx qs cpu，8大核8小核，matx版型ddr4内存 
 ---
 
 ## 介绍
+
+备注：我这个主板买的早，板载的是千兆网卡，后来的新版本更换了2.5g网卡。
 
 http://tbtopc.com/ProDetail.aspx?ProId=59
 
