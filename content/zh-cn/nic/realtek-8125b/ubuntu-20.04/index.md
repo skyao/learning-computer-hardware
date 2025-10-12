@@ -1,13 +1,19 @@
 ---
 title: "ubuntu 20.04 驱动安装"
-linkTitle: "ubuntu 20.04"
-weight: 10
+linkTitle: "[归档]ubuntu 20.04"
+weight: 100
 date: 2022-03-10
 description: >
   在 ubuntu 20.04 下安装 Realtek 8125b 驱动
 ---
 
+{{% alert title="归档说明" %}} 
 
+可能当时用到的这个 r8125 驱动还不够成熟？也许换到2025年新发的版本就解决了？但因为我后来因为升级不再使用 ubuntu 20.04 这个版本了。就不再继续研究。
+
+{{% /alert %}}
+
+------------------
 
 ## 问题
 
