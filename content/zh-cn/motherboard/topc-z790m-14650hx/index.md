@@ -128,6 +128,7 @@ bios 来自： [MODT平台最能打的一集！TOPC i9-13980HX板U超频性能�
 
 #### 超频
 
+- cpu VDDQ: 1.35v
 - memory profile: 自定义
 - 内存频率: 4000
 - 内存电压 vddq: 1.40v
@@ -139,25 +140,25 @@ bios 来自： [MODT平台最能打的一集！TOPC i9-13980HX板U超频性能�
 | 参数     | 4000  |
 | -------- | ----- |
 | NMODE    | 1    |
-| tCL      | 19    |
-| tRCD/tRP | 21    |
-| tRAS     | 40    |
-| TRFC2    | 660   |
+| tCL      | 18    |
+| tRCD/tRP | 22    |
+| tRAS     | 42    |
+| TRFC2    | 520   |
 | tREFI    | 65535 |
-| TWR      | 12    |
-| TWTR_L   | 10    |
-| TWTR_S   | 4     |
-| TRRD_L   | 8     |
-| TRRD_S   | 4     |
-| TRTP     | 6     |
-| tFAW     | 16    |
+| TWR      | 24    |
+| TWTR_L   | 15    |
+| TWTR_S   | 5     |
+| TRRD_L   | 11     |
+| TRRD_S   | 8     |
+| TRTP     | 12     |
+| tFAW     | 44    |
 | tCWL     | 20    |
 | tCKE     | 0     |
-| tRFC     | 660   |
-| TRRD     | 4     |
+| tRFC     | 700   |
+| TRRD     | 0     |
 | TWTR     | 0     |
 | tRFCpb   | 0     |
-| TRFC4    | 660   |
+| TRFC4    | 320   |
 | TCCD_L   | 8     |
 
 ### ring 超频
