@@ -20,175 +20,106 @@ https://www.asus.com.cn/motherboards-components/motherboards/prime/prime-z690-p-
 1. 价格便宜，超频能力尚可，用来超频13700k 和旗舰主板差距不大，够用了。
 2. 有四条pcie16x：只有一条是pcie5.0 16x（实际16x）, 两条 pcie3.0 16x（实际4x），一条pcie4.0 16x（实际4x） 
 
-## 
+bios 升级到最新版本 3802.
 
-## 主力机 13700kf
+## bios 设置
 
-13700kf oc 全核 5.6g，小核 4.2g, 搭配 英睿达铂胜8G c9bjz 内存 实现 8g x 4 = 32g 
+### 常规设置
 
-### bios 2801 定压定频5.6g
+F7 进入bios高级设置，“Exit”  --> "Load Optimized Default".
 
-主板超频bios设置 (bios 版本 2801）：
+"Advanced" --> "CPU Configuration"  --> "CPU - Power Management Control":
 
-Ai tweaker：
+- Boot performance mode: "Max Non-Turbo Performace"
+- CPU c-state： enabled
+- Package C State Limit： auto
+
+"Advanced" -> "PCI subsystem Settings":
+
+- SR-IOV Support [Enabled]
+
+"Advanced" -> "APM Configuration":
+
+- Restore AC Power Loss: power on
+
+"Monitor" --> "Q-Fan Tuning"
+- CPU Fan Q-Fan Control: pwm mode
+- CPU Fan Profile: Silent
+- 其他类似
+
+"Boot" --> "Boot Configuration"
+
+- Fast Boot: disabled
+- Boot Logo Display: disabled
+- Bootup Numlock State: off
+- Wait For 'F1' If Error: disabled
+- Setup Mode: Advanced Mode
+
+### cpu超频设置
+
+不追求极致性能，只追求稳定，因此只简单设置一下 cpu 频率和电压。
+
+"AI Tweaker"
+
+- Performance Preferences: asus advanced oc profile
+- Ai Overclock Tuner: "Manual"
+- Asus MultiCore Enhancement: disabled - enfore all limits
+- Performance Core Ratio: "Sync All Cores"
+   - All-Core Ratio Limit: 54
+- Efficific Core Ratio: "Sync All Cores"
+   - All-Core Ratio Limit: 42
+- AVX related Controls:
+   - avx2: enabled
+   - avx2 ratio offset to per-core ratio limit: user specify
+   - avx2 ratio offset: 10
+- DIGI+ VRM:
+   - CPU Load-line Calibration: Level 6
+- Internal CPU Power Management:
+   - maximum cpu core temperature: 100
+   - Long Duration Package Power Limit: 253
+   - Short Duration Package Power Limit: 280
+- Ring Down Bin: "Auto"
+- Min. CPU Cache Ratio: 8
+- Max. CPU Cache Ratio: 48
+- Global Core SVID Voltage: adaptive mode
+   - offset mode sign: - 
+   - cpu core voltage offset: 0.1
+- CPU Syatem Agent Voltage: 1.2v
+- CPU Input Voltage [1.90000]
+
+
+### 内存超频设置
+
+"AI Tweaker"
+
+- BCLK Frequency : DRAM Frequency Ratio [100:100]
+- Memory Controller : DRAM Frequency Ratio [1:1]
+- DRAM Frequency [DDR4-4000MHz]
+- DRAM Voltage [1.35]
+- IVR Transmitter VDDQ Voltage [1.35]
+
+"AI Tweaker" -> ""DRAM Timing Control":
 
 ```properties
-Ai Overclock Tuner [XMP I]
-XMP [XMP DDR4-4000 16-21-21-42-1.45V]
-BCLK Frequency [Auto]
-Intel(R) Adaptive Boost Technology [Enabled]
-ASUS MultiCore Enhancement [Enabled – Remove All limits]
-SVID Behavior [Auto]
-BCLK Frequency : DRAM Frequency Ratio [100:100]
-Memory Controller : DRAM Frequency Ratio [1:1]
-DRAM Frequency [DDR4-4200MHz]
-OC Tuner [Keep Current Settings]
-Performance Core Ratio [Sync All Cores]
-All-Core Ratio Limit [56]
-
-Efficient Core Ratio [Sync All Cores]
-ALL-Core Ratio Limit [42]
-```
-
-Ai tweaker -> AVX Related Controls：
-
-```properties
-AVX2 [Enabled]
-AVX2 Ratio Offset to per-core Ratio Limit [User Specify]
-AVX2 Ratio Offset [10]
-AVX2 Voltage Guardband Scale Factor [User Specify]
-AVX2 Voltage Guardband Scale Factor [10]
-```
-
-Ai tweaker -> DRAM Timing Control：
-
-> 备注：用的是 英睿达 c9blm 内存，可以跑 ddr4 4200.
-
-```properties
-DRAM CAS# Latency [16]
-DRAM RAS# to CAS# Delay [23]
-DRAM RAS# PRE Time [23]
-DRAM RAS# ACT Time [46]
-DRAM Command Rate [2N]
-DRAM RAS# to RAS# Delay L [9]
-DRAM RAS# to RAS# Delay S [6]
+DRAM CAS# Latency [18]
+DRAM RAS# to CAS# Delay [22]
+DRAM RAS# PRE Time [22]
+DRAM RAS# ACT Time [42]
+DRAM Command Rate [1N]
+DRAM RAS# to RAS# Delay L [12]
+DRAM RAS# to RAS# Delay S [9]
 DRAM REF Cycle Time [660]
-DRAM REF Cycle Time 2 [660]
-DRAM REF Cycle Time 4 [660]
-DRAM Refresh Interval [65536]
-DRAM WRITE Recovery Time [16]
+DRAM REF Cycle Time 2 [400]
+DRAM REF Cycle Time 4 [250]
+DRAM Refresh Interval [65535]
+DRAM WRITE Recovery Time [24]
 DRAM READ to PRE Time [12]
-DRAM FOUR ACT WIN Time [38]
+DRAM FOUR ACT WIN Time [24]
 DRAM WRITE to READ Delay [5]
-DRAM WRITE to READ Delay L [12]
-DRAM WRITE to READ Delay S [12]
+DRAM WRITE to READ Delay L [15]
+DRAM WRITE to READ Delay S [6]
 DRAM CAS to CAS Delay L [8]
-DRAM CKE Minimum Pulse Width [8]
-DRAM Write Latency [18]
+DRAM CKE Minimum Pulse Width [12]
+DRAM Write Latency [20]
 ```
 
-Ai tweaker -> DIGI+VRM：
-
-```properties
-CPU Load-line Calibration [Level 6]
-```
-
-Ai tweaker -> DIGI+VRM：
-
-```properties
-Maximum CPU Core Temperature [110]
-Long Duration Package Power Limit [300]
-Short Duration Package Power Limit [300]
-IA AC Load Line [0.01]
-IA DC Load Line [0.01]
-```
-
-Ai tweaker:
-
-```properties
-Ring Down Bin [Auto]
-Min. CPU Cache Ratio [Auto]
-Max. CPU Cache Ratio [Auto]
-BCLK Aware Adaptive Voltage [Enabled]
-Actual VRM Core Voltage [Manual Mode]
-- CPU Core Voltage Override [1.42000]
-Global Core SVID Voltage [Auto]
-Cache SVID Voltage [Auto]
-CPU L2 Voltage [Auto]
-CPU System Agent Voltage [Manual Mode]
-- CPU System Agent Voltage Override [1.43000]
-CPU Input Voltage [1.90000]
-DRAM Voltage [1.50000]
-IVR Transmitter VDDQ Voltage [1.43000]
-PCH 1.8V Primary Voltage [Auto]
-```
-
-Advanced:
-
-Advanced -> Platform Misc Configuration:
-
-Advanced -> CPU Configuration:
-
-Advanced -> PCI subsystem Settings:
-
-```properties
-Above 4G Decoding [Enabled]
-Re-Size BAR Support [Enabled]
-SR-IOV Support [Enabled]
-```
-
-Advanced -> Restore AC Power Loss:
-
-```properties
-Restore AC Power Loss [Power On]
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#### ~~bios 2404~~
-
-主板超频bios设置 (bios 版本 2404）：
-
-- [z690_5.6g_4200_32g.CMO](images/z690_5.6g_4200_32g.CMO) 
--  [z690_5.6g_4200_32g.txt](images/z690_5.6g_4200_32g.txt) 
--  [z690_5.8g_4200_32g_noht.CMO](../../../../../../../../../media/sky/U16G/z690_5.8g_4200_32g_noht.CMO) 
--  [z690_5.8g_4200_32g_noht.txt](../../../../../../../../../media/sky/U16G/z690_5.8g_4200_32g_noht.txt) 
-
-> 备注：升级到最新的支持14代cpu的bios（2802）之后，这个超频配置不稳定，需要重新调整。
-
-
-
-
-
-### 开发机 13700k
-
-13700k oc 全核 5.6g，小核 4.2g, 搭配 阿斯加特32G ddr4 2666 (真香条) 实现 32g x 4 = 128g 
-
-![z690_5.6g_3600_128g_setting](images/z690_5.6g_3600_128g_setting.png)
-
-主板超频bios设置 (bios 版本 2404）：
-
-- [z690_5.6g_3600_128g.CMO](images/z690_5.6g_3600_128g.CMO)  
-- [z690_5.6g_3600_128g_setting.txt](images/z690_5.6g_3600_128g_setting.txt) 
-
-备注：升级到最新的支持14代cpu的bios（2802）之后，这个超频配置不稳定，需要重新调整。
-
-
-
-
-
-### 备用机
-
-12400，搭配内存 实现 16g x 2 = 32g 
