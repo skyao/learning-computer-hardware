@@ -141,3 +141,51 @@ description: >
 | 200 |  |  |
 | 201 | 220 | 各区域设备（可重叠）|
 | 221 | 254 | dhcp号段 |
+
+## host定义
+
+windows 下修改 `C:\Windows\system32\drivers\etc` 文件.
+
+linux 下修改 `/etc/hosts` 文件:
+
+```bash
+sudo vi /etc/hosts
+```
+
+加入以下内容:
+
+```properties
+# device list for sky
+192.168.5.181 skywork
+192.168.3.182 skywork2
+192.168.4.182 skywork24
+192.168.0.5 skynas
+192.168.2.2 skynas2
+192.168.3.3	skynas3
+192.168.0.170 skynas170
+192.168.0.171 skynas171
+192.168.2.170 skynas172
+192.168.3.170 skynas173
+192.168.4.170 skynas174
+192.168.0.9 skyrouter
+192.168.2.9 skyrouter2
+192.168.4.9 skyrouter4
+192.168.0.19 skyserver
+192.168.0.29 skyserver2
+192.168.0.39 skyserver3
+192.168.0.49 skyserver4
+192.168.0.59 skyserver5
+192.168.0.69 skyserver6
+192.168.3.119 skydev
+192.168.3.129 skydev2
+192.168.3.139 skydev3
+192.168.3.149 skydev4
+192.168.3.159 skydev5
+192.168.0.191 devserver191
+192.168.2.192 devserver192
+192.168.3.193 devserver193
+
+# fixed ip
+159.75.84.176 skyao.net
+159.75.84.176 www.skyao.net
+```
