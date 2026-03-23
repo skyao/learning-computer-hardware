@@ -158,15 +158,14 @@ sudo vi /etc/hosts
 # device list for sky
 192.168.5.181 skywork
 192.168.3.182 skywork2
-192.168.4.182 skywork24
 192.168.0.5 skynas
 192.168.2.2 skynas2
 192.168.3.3	skynas3
 192.168.0.170 skynas170
 192.168.0.171 skynas171
-192.168.2.170 skynas172
-192.168.3.170 skynas173
-192.168.4.170 skynas174
+192.168.2.172 skynas172
+192.168.3.173 skynas173
+192.168.3.174 skynas174
 192.168.0.9 skyrouter
 192.168.2.9 skyrouter2
 192.168.4.9 skyrouter4
@@ -184,6 +183,10 @@ sudo vi /etc/hosts
 192.168.0.191 devserver191
 192.168.2.192 devserver192
 192.168.3.193 devserver193
+192.168.0.11 dev11
+192.168.0.21 dev21
+192.168.3.111 dev111
+192.168.3.121 dev121
 
 # fixed ip
 159.75.84.176 skyao.net
