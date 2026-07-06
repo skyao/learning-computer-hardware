@@ -1,11 +1,17 @@
 ---
-title: "openwrt固件"
-linkTitle: "openwrt"
-weight: 10
+title: "[归档]openwrt固件"
+linkTitle: "[归档]openwrt"
+weight: 100
 date: 2022-03-10
 description: >
   TP-link XDR6088 刷机 openwrt 固件
 ---
+
+## 归档说明
+
+路由器莫名其妙的损坏，网口不可用，后来送修，付费维修才搞好。然后刷新的固件没有了，改成了最新版本的官方固件。
+
+最新的官方固件我不知道怎么刷 openwrt 了，懒的自己折腾，找人帮忙刷了。
 
 ## 第一次刷机23.5版本
 
