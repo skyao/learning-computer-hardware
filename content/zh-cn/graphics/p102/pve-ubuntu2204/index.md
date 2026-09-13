@@ -1,7 +1,7 @@
 ---
 title: "PVE8 直通 ubuntu 22.04"
 linkTitle: "PVE 直通 ubuntu 22.04"
-weight: 20
+weight: 80
 date: 2021-03-10
 description: p102显卡在PVE8下直通给 ubuntu 22.04 虚拟机的设置
 ---

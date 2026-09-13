@@ -1,7 +1,7 @@
 ---
 title: "直通 debian12"
 linkTitle: "debian12"
-weight: 10
+weight: 70
 date: 2025-03-13
 description: p102显卡在 PVE8 下直通给 debian12 虚拟机
 ---
